@@ -1067,7 +1067,7 @@ export function jsdocTransformer(
         // Note that this means tsickle does not report diagnostics for
         // side-effect path imports of JavaScript modules with conflicting
         // provides. That is working as intended.
-        if (!importDecl.importClause || leaveModulesAlone) return importDecl;
+        if (!importDecl.importClause) return importDecl;
 
         const sym = typeChecker.getSymbolAtLocation(importDecl.moduleSpecifier);
         // Scripts do not have a symbol, and neither do unused modules (empty
@@ -1197,7 +1197,17 @@ export function jsdocTransformer(
           if (!isTypeAlias) continue;
           const typeName =
               moduleTypeTranslator.symbolsToAliasedNames.get(aliasedSymbol) || aliasedSymbol.name;
-          const stmt = ts.factory.createExpressionStatement(
+          const stmt = leaveModulesAlone ?
+            ts.factory.createExportDeclaration(
+              undefined,
+              false,
+              ts.factory.createNamedExports([ts.factory.createExportSpecifier(
+                false,
+                undefined,
+                ts.factory.createIdentifier(exportedName)
+              )]),
+            ) 
+          : ts.factory.createExpressionStatement(
               ts.factory.createPropertyAccessExpression(
                   ts.factory.createIdentifier('exports'), exportedName));
           addCommentOn(stmt, [{tagName: 'typedef', type: '!' + typeName}]);

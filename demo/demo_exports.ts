@@ -6,7 +6,8 @@ export function bar() {
   return "bar";
 }
 
-export function baz() {
+export type SpecialType = string | number;
+export function baz() : SpecialType {
   return "baz";
 }
 
