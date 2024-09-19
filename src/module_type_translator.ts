@@ -295,7 +295,7 @@ export class ModuleTypeTranslator {
             undefined,
             ts.factory.createNamespaceImport(
               ts.factory.createIdentifier(requireTypePrefix))),
-          ts.factory.createStringLiteral(moduleNamespace)
+          ts.factory.createStringLiteral(importPath)
         )
       : ts.factory.createVariableStatement(
         undefined,
