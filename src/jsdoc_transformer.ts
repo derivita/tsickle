@@ -1087,7 +1087,7 @@ export function jsdocTransformer(
 
         moduleTypeTranslator.requireType(
             importDecl.moduleSpecifier, importPath, sym,
-            /* default import? */ !!importDecl.importClause.name);
+            /* default import? */ !!importDecl.importClause.name, leaveModulesAlone);
         return importDecl;
       }
 
@@ -1194,20 +1194,10 @@ export function jsdocTransformer(
           }
           const isTypeAlias = (aliasedSymbol.flags & ts.SymbolFlags.Value) === 0 &&
               (aliasedSymbol.flags & (ts.SymbolFlags.TypeAlias | ts.SymbolFlags.Interface)) !== 0;
-          if (!isTypeAlias) continue;
+          if (!isTypeAlias || leaveModulesAlone) continue;
           const typeName =
               moduleTypeTranslator.symbolsToAliasedNames.get(aliasedSymbol) || aliasedSymbol.name;
-          const stmt = leaveModulesAlone ?
-            ts.factory.createExportDeclaration(
-              undefined,
-              false,
-              ts.factory.createNamedExports([ts.factory.createExportSpecifier(
-                false,
-                undefined,
-                ts.factory.createIdentifier(exportedName)
-              )]),
-            ) 
-          : ts.factory.createExpressionStatement(
+          const stmt = ts.factory.createExpressionStatement(
               ts.factory.createPropertyAccessExpression(
                   ts.factory.createIdentifier('exports'), exportedName));
           addCommentOn(stmt, [{tagName: 'typedef', type: '!' + typeName}]);
