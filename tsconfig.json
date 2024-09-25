@@ -18,10 +18,11 @@
     "strict": true,
     "outDir": "out",
     "paths": {"tsickle": ["./src/tsickle.ts"]},
+    "esModuleInterop": true
   },
   "include": [
     "src/*.ts",
     "test/*.ts",
     "demo/*.ts"
-  ] 
+  ],
 }

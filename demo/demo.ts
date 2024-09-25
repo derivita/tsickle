@@ -9,9 +9,9 @@
  */
 
 import * as fs from 'fs';
-import * as minimist from 'minimist';
+import minimist from 'minimist';
 import * as path from 'path';
-import * as ts from 'typescript';
+import ts from 'typescript';
 import * as tsickle from 'tsickle';
 
 /** Tsickle settings passed on the command line. */
@@ -164,7 +164,7 @@ export function toClosureJS(
     pathToModuleName: (context, fileName) =>
         tsickle.pathToModuleName(rootModulePath, context, fileName),
     fileNameToModuleId: (fileName) => path.relative(rootModulePath, fileName),
-    googmodule: true,
+    googmodule: false,
     transformDecorators: true,
     transformTypesToClosure: true,
     typeBlackListPaths: new Set(),
@@ -198,14 +198,14 @@ function main(args: string[]): number {
     return 1;
   }
 
-  if (config.options.module !== ts.ModuleKind.CommonJS) {
-    // This is not an upstream TypeScript diagnostic, therefore it does not go
-    // through the diagnostics array mechanism.
-    console.error(
-        'tsickle converts TypeScript modules to Closure modules via CommonJS internally. ' +
-        'Set tsconfig.js "module": "commonjs"');
-    return 1;
-  }
+  // if (config.options.module !== ts.ModuleKind.CommonJS) {
+  //   // This is not an upstream TypeScript diagnostic, therefore it does not go
+  //   // through the diagnostics array mechanism.
+  //   console.error(
+  //       'tsickle converts TypeScript modules to Closure modules via CommonJS internally. ' +
+  //       'Set tsconfig.js "module": "commonjs"');
+  //   return 1;
+  // }
 
   // Run tsickle+TSC to convert inputs to Closure JS files.
   const result = toClosureJS(
@@ -227,7 +227,5 @@ function main(args: string[]): number {
   return 0;
 }
 
-// CLI entry point
-if (require.main === module) {
-  process.exit(main(process.argv.splice(2)));
-}
+// Always run this in the CLI mode.
+process.exit(main(process.argv.splice(2)));

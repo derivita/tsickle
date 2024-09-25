@@ -36,6 +36,7 @@ import {ModuleTypeTranslator} from './module_type_translator';
 import * as transformerUtil from './transformer_util';
 import {getPreviousDeclaration, isMergedDeclaration, symbolIsValue} from './transformer_util';
 import {isValidClosurePropertyName} from './type_translator';
+import { TsickleHost } from 'tsickle';
 
 function addCommentOn(
     node: ts.Node, tags: jsdoc.Tag[], escapeExtraTags?: Set<string>,
@@ -497,7 +498,7 @@ function containsOptionalChainingOperator(node: ts.PropertyAccessExpression|ts.N
  * JSDoc annotations.
  */
 export function jsdocTransformer(
-    host: AnnotatorHost&GoogModuleProcessorHost, tsOptions: ts.CompilerOptions,
+    host: AnnotatorHost&GoogModuleProcessorHost&TsickleHost, tsOptions: ts.CompilerOptions,
     typeChecker: ts.TypeChecker, diagnostics: ts.Diagnostic[]):
     (context: ts.TransformationContext) => ts.Transformer<ts.SourceFile> {
   return (context: ts.TransformationContext): ts.Transformer<ts.SourceFile> => {
@@ -1056,7 +1057,7 @@ export function jsdocTransformer(
         return createClosureCast(node, propertyAccessWithCast, propType);
       }
 
-      function visitImportDeclaration(importDecl: ts.ImportDeclaration) {
+      function visitImportDeclaration(importDecl: ts.ImportDeclaration, leaveModulesAlone = false) {
         // For each import, insert a goog.requireType for the module, so that if
         // TypeScript does not emit the module because it's only used in type
         // positions, the JSDoc comments still reference a valid Closure level
@@ -1086,7 +1087,7 @@ export function jsdocTransformer(
 
         moduleTypeTranslator.requireType(
             importDecl.moduleSpecifier, importPath, sym,
-            /* default import? */ !!importDecl.importClause.name);
+            /* default import? */ !!importDecl.importClause.name, leaveModulesAlone);
         return importDecl;
       }
 
@@ -1126,7 +1127,7 @@ export function jsdocTransformer(
        * visitExportDeclaration requireTypes exported modules and emits explicit exports for
        * types (which normally do not get emitted by TypeScript).
        */
-      function visitExportDeclaration(exportDecl: ts.ExportDeclaration): ts.Node|ts.Node[] {
+      function visitExportDeclaration(exportDecl: ts.ExportDeclaration, leaveModulesAlone = false): ts.Node|ts.Node[] {
         const importedModuleSymbol = exportDecl.moduleSpecifier &&
             typeChecker.getSymbolAtLocation(exportDecl.moduleSpecifier)!;
         if (importedModuleSymbol) {
@@ -1135,7 +1136,8 @@ export function jsdocTransformer(
           moduleTypeTranslator.requireType(
               exportDecl.moduleSpecifier!, (exportDecl.moduleSpecifier as ts.StringLiteral).text,
               importedModuleSymbol,
-              /* default import? */ false);
+              /* default import? */ false, 
+              leaveModulesAlone);
         }
 
         const typesToExport: Array<[string, ts.Symbol]> = [];
@@ -1192,7 +1194,7 @@ export function jsdocTransformer(
           }
           const isTypeAlias = (aliasedSymbol.flags & ts.SymbolFlags.Value) === 0 &&
               (aliasedSymbol.flags & (ts.SymbolFlags.TypeAlias | ts.SymbolFlags.Interface)) !== 0;
-          if (!isTypeAlias) continue;
+          if (!isTypeAlias || leaveModulesAlone) continue;
           const typeName =
               moduleTypeTranslator.symbolsToAliasedNames.get(aliasedSymbol) || aliasedSymbol.name;
           const stmt = ts.factory.createExpressionStatement(
@@ -1427,6 +1429,7 @@ export function jsdocTransformer(
       }
 
       function visitor(node: ts.Node): ts.Node|ts.Node[] {
+        const leaveModulesAlone = !host.googmodule && host.transformTypesToClosure
         if (transformerUtil.isAmbient(node)) {
           if (!transformerUtil.hasModifierFlag(node as ts.Declaration, ts.ModifierFlags.Export)) {
             return node;
@@ -1435,9 +1438,9 @@ export function jsdocTransformer(
         }
         switch (node.kind) {
           case ts.SyntaxKind.ImportDeclaration:
-            return visitImportDeclaration(node as ts.ImportDeclaration);
+            return visitImportDeclaration(node as ts.ImportDeclaration, leaveModulesAlone);
           case ts.SyntaxKind.ExportDeclaration:
-            return visitExportDeclaration(node as ts.ExportDeclaration);
+            return visitExportDeclaration(node as ts.ExportDeclaration, leaveModulesAlone);
           case ts.SyntaxKind.ClassDeclaration:
             return visitClassDeclaration(node as ts.ClassDeclaration);
           case ts.SyntaxKind.InterfaceDeclaration:

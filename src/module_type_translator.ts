@@ -255,7 +255,7 @@ export class ModuleTypeTranslator {
    */
   requireType(
       context: ts.Node, importPath: string, moduleSymbol: ts.Symbol,
-      isDefaultImport = false) {
+      isDefaultImport = false, leaveModulesAlone = false) {
     if (this.host.untyped) return;
     // Already imported? Do not emit a duplicate requireType.
     if (this.requireTypeModules.has(moduleSymbol)) return;
@@ -286,7 +286,18 @@ export class ModuleTypeTranslator {
     // goog.requireType types, which allows using them in type annotations
     // without causing a load.
     //   const requireTypePrefix = goog.requireType(moduleNamespace)
-    this.additionalImports.push(ts.factory.createVariableStatement(
+    this.additionalImports.push(
+      leaveModulesAlone ?
+        ts.factory.createImportDeclaration(
+          undefined,
+          ts.factory.createImportClause(
+            false,
+            undefined,
+            ts.factory.createNamespaceImport(
+              ts.factory.createIdentifier(requireTypePrefix))),
+          ts.factory.createStringLiteral(importPath)
+        )
+      : ts.factory.createVariableStatement(
         undefined,
         ts.factory.createVariableDeclarationList(
             [ts.factory.createVariableDeclaration(
