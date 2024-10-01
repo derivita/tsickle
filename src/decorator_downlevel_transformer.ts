@@ -530,6 +530,19 @@ export function decoratorDownlevelTransformer(
       if (decoratedProperties.size) {
         newMembers.push(createPropDecoratorsClassProperty(diagnostics, decoratedProperties));
       }
+      /**
+       * I'm pretty sure this is where the class ends up turning from
+       * 
+       * @classDecorator
+       * class Person { ... }
+       * 
+       * into
+       * 
+       * let Person = class Person { ... }
+       * Person = __decorate([
+       *    classDecorator
+       * ], Person);
+       */
       return ts.factory.updateClassDeclaration(
           classDecl, modifiersToKeep.length ? modifiersToKeep : undefined,
           classDecl.name, classDecl.typeParameters, classDecl.heritageClauses,
