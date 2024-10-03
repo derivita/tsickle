@@ -248,6 +248,11 @@ export function emit(
         transformDecoratorsOutputForClosurePropertyRenaming(
             tsickleDiagnostics));
     tsTransformers.after!.push(transformDecoratorJsdoc());
+  } else if (host.transformTypesToClosure) {
+    tsTransformers.after!.push(
+      transformDecoratorsOutputForClosurePropertyRenaming(
+          tsickleDiagnostics, false));
+    tsTransformers.after!.push(transformDecoratorJsdoc());
   }
   if (host.addDtsClutzAliases) {
     tsTransformers.afterDeclarations!.push(

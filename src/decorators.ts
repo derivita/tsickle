@@ -94,7 +94,7 @@ function isExportingDecorator(decorator: ts.Decorator, typeChecker: ts.TypeCheck
  *         ], Foo.prototype,
  *         __googReflect.objectProperty("prop", Foo.prototype), void 0);
  */
-export function transformDecoratorsOutputForClosurePropertyRenaming(diagnostics: ts.Diagnostic[]) {
+export function transformDecoratorsOutputForClosurePropertyRenaming(diagnostics: ts.Diagnostic[], useGoogModule = true) {
   return (context: ts.TransformationContext) => {
     const result: ts.Transformer<ts.SourceFile> = (sourceFile: ts.SourceFile) => {
       let nodeNeedingGoogReflect: undefined|ts.Node = undefined;
@@ -113,13 +113,13 @@ export function transformDecoratorsOutputForClosurePropertyRenaming(diagnostics:
       if (nodeNeedingGoogReflect !== undefined) {
         const statements = [...updatedSourceFile.statements];
         const googModuleIndex = statements.findIndex(isGoogModuleStatement);
-        if (googModuleIndex === -1) {
+        if (useGoogModule && googModuleIndex === -1) {
           reportDiagnostic(
               diagnostics, nodeNeedingGoogReflect,
               'Internal tsickle error: could not find goog.module statement to import __tsickle_googReflect for decorator compilation.');
           return sourceFile;
         }
-        const googRequireReflectObjectProperty =
+        const googRequireReflectObjectProperty = useGoogModule ?
             ts.factory.createVariableStatement(
                 undefined,
                 ts.factory.createVariableDeclarationList(
@@ -131,7 +131,18 @@ export function transformDecoratorsOutputForClosurePropertyRenaming(diagnostics:
                                 ts.factory.createIdentifier('goog'), 'require'),
                             undefined,
                             [ts.factory.createStringLiteral('goog.reflect')]))],
-                    ts.NodeFlags.Const));
+                    ts.NodeFlags.Const)) :
+                ts.factory.createImportDeclaration(
+                      undefined,
+                      ts.factory.createImportClause(
+                        false,
+                        ts.factory.createIdentifier('__tsickle_googReflect'),
+                        undefined
+                      ),
+                      ts.factory.createStringLiteral('goog:goog.reflect')
+                );
+                    
+
         // The boilerplate we produce has a goog.module line, then two related
         // lines dealing with the `module` variable. Insert our goog.require
         // after that to avoid visually breaking up the module info, and to be
