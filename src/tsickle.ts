@@ -24,6 +24,7 @@ import {FileSummary, SummaryGenerationProcessorHost} from './summary';
 import {isDtsFileName} from './transformer_util';
 import * as tsmes from './ts_migration_exports_shim';
 import {makeTsickleDeclarationMarkerTransformerFactory} from './tsickle_declaration_marker';
+import {fixDownleveledDecorators} from './fix_downleveled_decorators';
 
 // Exported for users as a default impl of pathToModuleName.
 export {pathToModuleName} from './cli_support';
@@ -253,6 +254,7 @@ export function emit(
       transformDecoratorsOutputForClosurePropertyRenaming(
           tsickleDiagnostics, false));
     tsTransformers.after!.push(transformDecoratorJsdoc());
+    tsTransformers.after!.push(fixDownleveledDecorators())
   }
   if (host.addDtsClutzAliases) {
     tsTransformers.afterDeclarations!.push(
