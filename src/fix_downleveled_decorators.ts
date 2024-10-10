@@ -23,33 +23,28 @@ import * as ts from "typescript";
  * I'm not sure if tsickle can even affect this at this point in the process or not.
  */
 export function fixDownleveledDecorators() {
+  const printer = ts.createPrinter();
   return (context: ts.TransformationContext): ts.Transformer<ts.SourceFile> => {
     return (sourceFile: ts.SourceFile) => {
       function visit(node: ts.Node): ts.Node {
-        // Check if the node is a VariableDeclaration
-        if (ts.isVariableDeclaration(node)) {
-          // Check if it's a variable declaration of a class expression
-          if (node.initializer && ts.isClassExpression(node.initializer)) {
-            const className = node.name;
-            const classNameAsString = className.getText();
-
-            const typeParameter = ts.factory.createTypeParameterDeclaration(
-              undefined,
-              classNameAsString,
-              undefined,
-              undefined
-            );
-
-            const classDeclaration = ts.factory.createClassDeclaration(
-              undefined,
-              undefined,
-              [typeParameter],
-              [],
-              node.initializer.members
-            );
-
-            // Replace the variable declaration with the class declaration
-            ts.factory.updateSourceFile(sourceFile, [classDeclaration]);
+        // Check if the node is a VariableDeclarationList
+        if (ts.isVariableDeclarationList(node)) {
+          for (const declaration of node.declarations) {
+            if (
+              declaration.initializer &&
+              ts.isClassExpression(declaration.initializer)
+            ) {
+              const className = declaration.name;
+              // convert the class expression to a class declaration
+              const classDeclaration = ts.factory.createClassDeclaration(
+                undefined,
+                className.getText(),
+                [],
+                [],
+                declaration.initializer.members
+              );
+              return classDeclaration;
+            }
           }
         }
         return ts.visitEachChild(node, visit, context);
