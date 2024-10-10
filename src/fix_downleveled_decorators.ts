@@ -1,7 +1,7 @@
 import * as ts from "typescript";
 
 /**
- * This is an attempt to fix the downleveled decorators so Closure doesn't have
+ * This fixes the downleveled decorators so Closure doesn't have
  * trouble with them. The problem is that when `experimentalDecorators` is
  * enabled, we TSC ends up converting a class decorator like this:
  *
@@ -19,8 +19,8 @@ import * as ts from "typescript";
  * 21| let Person = class Person {
  *                  ^^^^^^^^^^^^^^
  *
- * As previously mentioned, this transformer is an _attempt_, it doesn't actually work it seems.
- * I'm not sure if tsickle can even affect this at this point in the process or not.
+ * This transformer fixes the problem by converting the class expression
+ * to a class declaration.
  */
 export function fixDownleveledDecorators() {
   const printer = ts.createPrinter();
