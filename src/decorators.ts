@@ -132,7 +132,7 @@ export function transformDecoratorsOutputForClosurePropertyRenaming(diagnostics:
                                   ts.factory.createIdentifier('goog'), 'require'),
                               undefined,
                               [ts.factory.createStringLiteral('goog.reflect')]))],
-                      ts.NodeFlags.Const))
+                      ts.NodeFlags.Const));
                       
 
           // The boilerplate we produce has a goog.module line, then two related

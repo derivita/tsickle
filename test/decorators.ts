@@ -18,3 +18,25 @@ export const accessorDecorator = (value: boolean) => {
     }
   };
 };
+
+
+@classDecorator
+export class Person {
+    private name_: string;
+    constructor(name: string) {
+        this.name_ = name;
+    }
+
+    @accessorDecorator(true)
+    get name() {
+        return this.name_;
+    }
+  
+    @methodDecorator(true)
+    greet() {
+        console.log(`Hello, my name is ${this.name}.`);
+    }
+  }
+  
+  const p = new Person("Ron");
+  p.greet();

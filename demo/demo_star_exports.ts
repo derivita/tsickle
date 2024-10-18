@@ -5,4 +5,4 @@ export * from "./demo_exports";
 
 const myObj = new MyClass("myObj");
 
-const bazValue: SpecialType = baz()
+const bazValue: SpecialType = baz();

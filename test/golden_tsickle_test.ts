@@ -73,7 +73,7 @@ function compareAgainstGolden(
 }
 
 // Only run golden tests if we filter for a specific one.
-const testFn = process.env['TESTBRIDGE_TEST_ONLY'] ? fdescribe : describe;
+const testFn = process.env['TESTBRIDGE_TEST_ONLY'] ? describe : describe;
 
 /**
  * Return the google3 relative name of the filename.

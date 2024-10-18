@@ -254,7 +254,7 @@ export function emit(
       transformDecoratorsOutputForClosurePropertyRenaming(
           tsickleDiagnostics, false));
     tsTransformers.after!.push(transformDecoratorJsdoc());
-    tsTransformers.after!.push(fixDownleveledDecorators())
+    tsTransformers.after!.push(fixDownleveledDecorators());
   }
   if (host.addDtsClutzAliases) {
     tsTransformers.afterDeclarations!.push(
