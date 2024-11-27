@@ -1,5 +1,4 @@
 import * as ts from "typescript";
-import { getExportedDeclarations } from "./googmodule";
 
 /**
  * Closure compiler cannot handle:
