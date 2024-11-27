@@ -23,7 +23,6 @@ import * as ts from "typescript";
  * to a class declaration.
  */
 export function fixDownleveledDecorators() {
-  const printer = ts.createPrinter();
   return (context: ts.TransformationContext): ts.Transformer<ts.SourceFile> => {
     return (sourceFile: ts.SourceFile) => {
       function visit(node: ts.Node): ts.Node {
