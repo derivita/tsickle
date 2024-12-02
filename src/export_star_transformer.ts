@@ -14,7 +14,7 @@ import * as ts from "typescript";
  * export {namespace};
  * ```
  */
-export function exportStarTransformer(typeChecker: ts.TypeChecker) {
+export function exportStarTransformer() {
   return (context: ts.TransformationContext): ts.Transformer<ts.SourceFile> => {
     return (sourceFile: ts.SourceFile) => {
       function visit(node: ts.Node): ts.Node | ts.Node[] {
