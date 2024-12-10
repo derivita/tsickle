@@ -251,7 +251,7 @@ export function emit(
             tsickleDiagnostics));
     tsTransformers.after!.push(transformDecoratorJsdoc());
   } else if (host.transformTypesToClosure) {
-    tsTransformers.after!.push(exportStarTransformer(typeChecker));
+    tsTransformers.after!.push(exportStarTransformer());
     tsTransformers.after!.push(
       transformDecoratorsOutputForClosurePropertyRenaming(
           tsickleDiagnostics, false));

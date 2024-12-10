@@ -1,4 +1,4 @@
-import { accessorDecorator, classDecorator, methodDecorator } from "./decorators";
+import { accessorDecorator, annotatedAccessorDecorator, classDecorator, methodDecorator } from "./decorators";
 
 @classDecorator
 export class Person {
@@ -10,6 +10,11 @@ export class Person {
     @accessorDecorator(true)
     get name() {
         return this.name_;
+    }
+
+    @annotatedAccessorDecorator(true)
+    get age() {
+        return 42;
     }
   
     @methodDecorator(true)
